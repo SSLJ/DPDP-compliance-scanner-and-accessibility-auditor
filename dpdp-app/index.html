@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DPDP Compliance Scanner — Sign In</title>
+    <meta name="description"
+      content="Secure login for the DPDP Compliance Scanner and AI-Based Accessibility Auditor, powered by South Indian Bank." />
+    <link rel="icon" href="https://www.southindianbank.bank.in/images/favicon.png" />
+
+    <!-- Tailwind CSS CDN — identical config to login.html -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              sib: {
+                maroon: '#B5131A',
+                deep: '#7A0D10',
+                mid: '#C8282E',
+                soft: '#E99090',
+                muted: 'rgba(176,30,35,0.10)',
+              },
+            },
+            fontFamily: {
+              jakarta: ['"Plus Jakarta Sans"', 'Arial', 'Helvetica', 'sans-serif'],
+              display: ['"DM Serif Display"', 'Georgia', 'serif'],
+            },
+            animation: {
+              'fade-up': 'fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) both',
+              'pulse-dot': 'pulseDot 2s ease-in-out infinite',
+            },
+            keyframes: {
+              fadeUp: { from: { opacity: '0', transform: 'translateY(20px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+              pulseDot: { '0%,100%': { opacity: '1', transform: 'scale(1)' }, '50%': { opacity: '0.4', transform: 'scale(0.6)' } },
+            },
+            boxShadow: {
+              'card': '0 24px 64px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.06)',
+              'btn': '0 4px 16px rgba(176,30,35,0.30)',
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap"
+      rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
