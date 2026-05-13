@@ -1,6 +1,7 @@
 import os
 import base64
 import logging
+import asyncio
 from contextlib import asynccontextmanager
 from typing import List
 
@@ -30,6 +31,26 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Global DB pool
 pool = None
 
+async def cleanup_old_images():
+    """Background task to delete images older than 15 minutes."""
+    while True:
+        try:
+            await asyncio.sleep(300) # Run every 5 minutes
+            if pool:
+                async with pool.acquire() as conn:
+                    # Delete records older than 15 minutes
+                    result = await conn.execute(
+                        "DELETE FROM images WHERE uploaded_at < NOW() - INTERVAL '15 minutes'"
+                    )
+                    deleted_count = int(result.split(" ")[-1]) if result.startswith("DELETE") else 0
+                    if deleted_count > 0:
+                        logger.info(f"Cleanup: Deleted {deleted_count} abandoned images.")
+        except asyncio.CancelledError:
+            logger.info("Cleanup task cancelled.")
+            break
+        except Exception as e:
+            logger.error(f"Error in cleanup_old_images task: {e}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global pool
@@ -55,21 +76,31 @@ async def lifespan(app: FastAPI):
                 uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        # Seed users if empty
-        val = await conn.fetchval("SELECT COUNT(*) FROM users")
-        if val == 0:
-            initial_users = [
-                {'userId': 'E1001', 'password': 'Password123!'},
-                {'userId': 'E1002', 'password': 'Password123!'},
-                {'userId': 'E1003', 'password': 'Password123!'},
-                {'userId': 'admin1', 'password': 'Password123!'},
-                {'userId': 'admin', 'password': 'admin'}
-            ]
-            for u in initial_users:
-                hashed = pwd_context.hash(u['password'])
-                await conn.execute("INSERT INTO users (user_id, password_hash) VALUES ($1, $2)", u['userId'], hashed)
-            logger.info("Seeded initial users.")
+        # Sync initial users
+        initial_users = [
+            {'userId': 'E1001', 'password': 'Password123!'},
+            {'userId': 'E1002', 'password': 'Password123!'},
+            {'userId': 'E1003', 'password': 'Password123!'},
+            {'userId': 'sanoj', 'password': 'sib123'},
+            {'userId': 'admin', 'password': 'admin'}
+        ]
+        for u in initial_users:
+            hashed = pwd_context.hash(u['password'])
+            await conn.execute("""
+                INSERT INTO users (user_id, password_hash) 
+                VALUES ($1, $2)
+                ON CONFLICT (user_id) DO UPDATE SET password_hash = EXCLUDED.password_hash
+            """, u['userId'], hashed)
+        logger.info("Synced initial users.")
+    
+    # Start the background cleanup task
+    cleanup_task = asyncio.create_task(cleanup_old_images())
+    
     yield
+    
+    # Cancel the background cleanup task on shutdown
+    cleanup_task.cancel()
+    
     logger.info("Closing database connection...")
     await pool.close()
 
