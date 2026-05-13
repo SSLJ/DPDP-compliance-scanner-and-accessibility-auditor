@@ -7,11 +7,13 @@ from typing import List
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+# pyrefly: ignore [missing-import]
 import asyncpg
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
+# pyrefly: ignore [missing-import]
+from dotenv import load_dotenv 
 
 load_dotenv()
 
