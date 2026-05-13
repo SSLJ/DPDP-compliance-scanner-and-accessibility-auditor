@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function UploadPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [files, setFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -72,8 +73,11 @@ export default function UploadPage() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         setIsUploading(false);
-        navigate('/select');
+        const existingImageIds = location.state?.imageIds || [];
+        const combinedImageIds = [...existingImageIds, ...data.image_ids];
+        navigate('/select', { state: { imageIds: combinedImageIds } });
       } else {
         const errorData = await response.json();
         alert('Upload failed: ' + (errorData.error || 'Unknown error'));
@@ -96,10 +100,10 @@ export default function UploadPage() {
       <header className="w-full bg-sib-maroon flex-shrink-0 z-10 shadow-sm">
         <div className="max-w-[1200px] mx-auto flex items-center px-5" style={{ height: '90px' }}>
           <img
-            src="https://www.southindianbank.bank.in/images/logo.png"
+            src="/SIB_Logo.png"
             alt="South Indian Bank"
             className="w-auto object-contain cursor-pointer"
-            style={{ height: '65px', filter: 'brightness(0) invert(1)' }}
+            style={{ height: '71.5px' }}
             onClick={() => navigate('/')}
             onError={e => { e.currentTarget.style.display = 'none' }}
           />

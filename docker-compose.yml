@@ -15,12 +15,11 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/dpdp_scanner
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/dpdp_scanner
     depends_on:
       - db
     volumes:
       - ./backend:/app
-      - /app/node_modules
 
   frontend:
     build: ./dpdp-app
